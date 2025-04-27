@@ -3,27 +3,33 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const db = require('../models/db');
 const jwt = require('jsonwebtoken');
 
-const GOOGLE_CLIENT_ID = 'your-client-id';
-const GOOGLE_CLIENT_SECRET = 'your-secret';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: "/auth/google/callback"
-}, (accessToken, refreshToken, profile, done) => {
+  callbackURL: "http://localhost:5000/api/googleAuth/google/callback"
+}, async (accessToken, refreshToken, profile, done) => {
   const google_id = profile.id;
   const email = profile.emails[0].value;
   const username = profile.displayName;
 
-  const findOrCreate = `
-    INSERT INTO Users (username, email, google_id)
-    VALUES ($1, $2, $3)
-    ON CONFLICT (email)
-    DO UPDATE SET google_id = EXCLUDED.google_id
-  `;
+  try {
+    // Insert or update the user
+    const query = `
+      INSERT INTO Users (username, email, google_id)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (email)
+      DO UPDATE SET google_id = EXCLUDED.google_id
+      RETURNING user_id, username
+    `;
+    const result = await db.query(query, [username, email, google_id]);
 
-  db.query(findOrCreate, [username, email, google_id], (err) => {
-    if (err) return done(err);
-    done(null, { user_id: google_id, username });
-  });
+    const user = result.rows[0];
+    done(null, user);  // Now user has user_id and username from your DB
+  } catch (err) {
+    console.error('Google OAuth error:', err);
+    done(err, null);
+  }
 }));

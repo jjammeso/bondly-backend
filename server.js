@@ -6,15 +6,19 @@ const likeRoutes = require('./routes/likes');
 const auth = require('./middleware/authMiddleware');
 const authRoutes = require('./routes/auth');
 const googleAuthRoutes = require('./routes/googleAuth');
-
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
+const cors = require('cors');
+
+app.use(cors({
+    origin:'http://10.0.0.46:3000',
+    credentials: true,
+}));
 
 app.use(bodyParser.json());
 
-
-app.use('/auth', authRoutes);
-app.use('/auth', googleAuthRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/googleAuth', googleAuthRoutes);
 
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);

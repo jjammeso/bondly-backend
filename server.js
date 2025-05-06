@@ -11,7 +11,7 @@ const PORT = 5000;
 const cors = require('cors');
 
 app.use(cors({
-    origin:'http://10.0.0.46:3000',
+    origin:'https://bondly-chi.vercel.app',
     credentials: true,
 }));
 
@@ -23,6 +23,10 @@ app.use('/api/googleAuth', googleAuthRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/likes', likeRoutes);
+
+app.get('/', (req,res) => {
+  res.send('server is running');
+})
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -11,7 +11,7 @@ router.get('/google/callback',
   passport.authenticate('google', { session: false }),
   (req, res) => {
     const token = jwt.sign(req.user, 'your_jwt_secret');
-    res.redirect(`http://localhost:3000/login/success?token=${token}`);
+    res.redirect(`https://bondly-chi.vercel.app/login/success?token=${token}`);
   }
 );
 
